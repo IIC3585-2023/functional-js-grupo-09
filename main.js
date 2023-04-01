@@ -16,12 +16,28 @@ const parseBoldUnderscore = parseTag(/\_\_(.*?)\_\_/gm, 'strong');
 const parseItalicAsterisc = parseTag(/\*(.*?)\*/gm, 'em');
 const parseItalicUnderscore = parseTag(/\_(.*?)\_/gm, 'em');
 
+// Parses markdown bold text to html
+const parseBold = (text) =>
+  _.flow(parseBoldAsterisc, parseBoldUnderscore)(text);
+
+// Parses markdown italic text to html
+const parseItalic = (text) =>
+  _.flow(parseItalicAsterisc, parseItalicUnderscore)(text);
+
+// Adds line breaks to text
+const addLineBreaks = (text) => text.replace(/  $/gm, '<br>');
+
+// Join paragraphs tags
+const joinParagraphs = (text) => text.replace(/<\/p><p>/gm, '');
+
+// Parses markdown headers to html
 const parseHeaders = (line) => {
   const level = line.split(' ')[0].length;
   const content = line.slice(level).trim();
   return `<h${level}>${content}</h${level}>`;
 };
 
+// Parses markdown lists to html
 const parseLists = (line) => {
   const content = line.slice(2).trim();
   return `<li>${content}</li>`;
@@ -38,21 +54,15 @@ const conditions = [
   [_.stubTrue, (line) => `<p>${line}</p>`],
 ];
 
-// Parses markdown bold text to html
-const parseBold = (text) =>
-  _.flow(parseBoldAsterisc, parseBoldUnderscore)(text);
-
-// Parses markdown italic text to html
-const parseItalic = (text) =>
-  _.flow(parseItalicAsterisc, parseItalicUnderscore)(text);
-
 const convertMarkdownToHtml = _.flow(
   readFile,
   parseBold,
   parseItalic,
+  addLineBreaks,
   _.split('\n'),
   _.map(_.cond(conditions)),
   _.join(''),
+  joinParagraphs,
   writeFile
 );
 
