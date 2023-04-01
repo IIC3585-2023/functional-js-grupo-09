@@ -11,59 +11,86 @@ const writeFile = _.curry(fs.writeFileSync)('output.html', _, 'utf8');
 const parseTag = (regex, tag) => (text) =>
   text.replace(regex, `<${tag}>$1</${tag}>`);
 
-const parseBoldAsterisc = parseTag(/\*\*(.*?)\*\*/gm, 'strong');
-const parseBoldUnderscore = parseTag(/\_\_(.*?)\_\_/gm, 'strong');
-const parseItalicAsterisc = parseTag(/\*(.*?)\*/gm, 'em');
-const parseItalicUnderscore = parseTag(/\_(.*?)\_/gm, 'em');
+const parseBoldAsteriscs = parseTag(/\*\*(.*?)\*\*/gm, 'b');
+const parseBoldUnderscores = parseTag(/\_\_(.*?)\_\_/gm, 'b');
+
+const parseItalicAsteriscs = parseTag(/\*(.*?)\*/gm, 'i');
+const parseItalicUnderscores = parseTag(/\_(.*?)\_/gm, 'i');
 
 // Parses markdown bold text to html
-const parseBold = (text) =>
-  _.flow(parseBoldAsterisc, parseBoldUnderscore)(text);
+const parseBolds = (text) =>
+  _.flow(parseBoldAsteriscs, parseBoldUnderscores)(text);
 
 // Parses markdown italic text to html
-const parseItalic = (text) =>
-  _.flow(parseItalicAsterisc, parseItalicUnderscore)(text);
+const parseItalics = (text) =>
+  _.flow(parseItalicAsteriscs, parseItalicUnderscores)(text);
 
 // Adds line breaks to text
 const addLineBreaks = (text) => text.replace(/  $/gm, '<br>');
 
 // Join paragraphs tags
-const joinParagraphs = (text) => text.replace(/<\/p><p>/gm, '');
+const joinParagraphs = (text) => text.replace(/<\/p><p>/g, '');
+
+// Join blockquotes tags
+const joinBlockquotes = (text) =>
+  text.replace(/<\/blockquote><blockquote>/g, '<br>');
 
 // Parses markdown headers to html
-const parseHeaders = (line) => {
+const parseHeader = (line) => {
   const level = line.split(' ')[0].length;
   const content = line.slice(level).trim();
   return `<h${level}>${content}</h${level}>`;
 };
 
 // Parses markdown lists to html
-const parseLists = (line) => {
+const parseUnorderedList = (line) => {
   const content = line.slice(2).trim();
   return `<li>${content}</li>`;
 };
 
-// [function(bool), function to execute if bool is true]
+// Parses markdown blockquotes to html
+const parseBlockquote = (line) => {
+  const content = line.slice(1).trim();
+  return `<blockquote>${content}</blockquote>`;
+};
+
+// [function: bool, function to execute if bool is true]
 const conditions = [
   [(line) => line === '', () => '\n'],
-  [(line) => /^#{1,6} /g.test(line), (line) => parseHeaders(line)],
+  [(line) => /^#{1,6} /g.test(line), (line) => parseHeader(line)],
   [
     (line) => line.startsWith('* ') || line.startsWith('- '),
-    (line) => parseLists(line),
+    (line) => parseUnorderedList(line),
   ],
+  [(line) => line.startsWith('>'), (line) => parseBlockquote(line)],
   [_.stubTrue, (line) => `<p>${line}</p>`],
 ];
 
 const convertMarkdownToHtml = _.flow(
   readFile,
-  parseBold,
-  parseItalic,
+  parseBolds,
+  parseItalics,
   addLineBreaks,
   _.split('\n'),
   _.map(_.cond(conditions)),
   _.join(''),
   joinParagraphs,
+  joinBlockquotes,
   writeFile
 );
+
+// others
+// .replace(/\[(.*?)\]\((.*?)\)/gim, "<a href='$2'>$1</a>")
+// .replace(/\n$/gim, '<br />')
+
+function parseMarkdown(markdownText) {
+  const htmlText = markdownText
+    .replace(/^\> (.*$)/gim, '<blockquote>$1</blockquote>')
+    .replace(/!\[(.*?)\]\((.*?)\)/gim, "<img alt='$1' src='$2' />")
+    .replace(/\[(.*?)\]\((.*?)\)/gim, "<a href='$2'>$1</a>")
+    .replace(/\n$/gim, '<br />');
+
+  return htmlText.trim();
+}
 
 convertMarkdownToHtml('test.md');
