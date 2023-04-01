@@ -1,49 +1,59 @@
 const fs = require('fs');
-const _ = require('lodash');
+const _ = require('lodash/fp');
 
-// function to read the .d file
-const readMdFile = (mdpath) => fs.readFileSync(mdpath, 'utf8');
+// Curried function to read file
+const readFile = _.curry(fs.readFileSync)(_, 'utf8');
 
-// function to write the .html file
-const writeHTMLFile = (htmlpath, data) => fs.writeFileSync(htmlpath, data)
+// Curried funtion to read file
+const writeFile = _.curry(fs.writeFileSync)('output.html', _, 'utf8');
 
-// function to replace headers
-const replaceHeaderByNum = (h, text) => {
-	const regex = new RegExp(`^#{${h}} (.*$)`, "gim");
-	return text.replace(regex, `<h${h}>$1</h${h}>`);
+// Function to parse a text to a tag using regex
+const parseTag = (regex, tag) => (text) =>
+  text.replace(regex, `<${tag}>$1</${tag}>`);
+
+const parseBoldAsterisc = parseTag(/\*\*(.*?)\*\*/gm, 'strong');
+const parseBoldUnderscore = parseTag(/\_\_(.*?)\_\_/gm, 'strong');
+const parseItalicAsterisc = parseTag(/\*(.*?)\*/gm, 'em');
+const parseItalicUnderscore = parseTag(/\_(.*?)\_/gm, 'em');
+
+const parseHeaders = (line) => {
+  const level = line.split(' ')[0].length;
+  const content = line.slice(level).trim();
+  return `<h${level}>${content}</h${level}>`;
 };
 
-const replaceHeaders = (headearsArr, text) => {
-	headearsArr.forEach(num => {
-		text = replaceHeaderByNum(num, text)
-	});
-	return text;
+const parseLists = (line) => {
+  const content = line.slice(2).trim();
+  return `<li>${content}</li>`;
 };
 
-// function to make other replacements
-function parseMarkdown(markdownText) {
-	const htmlText = markdownText
-		// paragraphs
+// [function(bool), function to execute if bool is true]
+const conditions = [
+  [(line) => line === '', () => '\n'],
+  [(line) => /^#{1,6} /g.test(line), (line) => parseHeaders(line)],
+  [
+    (line) => line.startsWith('* ') || line.startsWith('- '),
+    (line) => parseLists(line),
+  ],
+  [_.stubTrue, (line) => `<p>${line}</p>`],
+];
 
-		// bold
-		.replace(/\*\*(.*)\*\*/gim, '<strong>$1</strong>')
-		.replace(/\_\_(.*)\_\_/gim, '<strong>$1</strong>')
+// Parses markdown bold text to html
+const parseBold = (text) =>
+  _.flow(parseBoldAsterisc, parseBoldUnderscore)(text);
 
-		// italic
-		.replace(/\*(.*)\*/gim, '<em>$1</em>')
-		.replace(/\_(.*)\_/gim, '<em>$1</em>')
+// Parses markdown italic text to html
+const parseItalic = (text) =>
+  _.flow(parseItalicAsterisc, parseItalicUnderscore)(text);
 
-		// lists
-		
-		// others
-		// .replace(/\[(.*?)\]\((.*?)\)/gim, "<a href='$2'>$1</a>")
-		// .replace(/\n$/gim, '<br />')
+const convertMarkdownToHtml = _.flow(
+  readFile,
+  parseBold,
+  parseItalic,
+  _.split('\n'),
+  _.map(_.cond(conditions)),
+  _.join(''),
+  writeFile
+);
 
-	return htmlText.trim()
-}
-
-const compose = (f, g) => (x) => f([1,2,3,4,5,6], g(x));
-const composeHeaders = compose(replaceHeaders, parseMarkdown);
-
-data = readMdFile('test.md');
-writeHTMLFile('output.html', composeHeaders(data))
+convertMarkdownToHtml('test.md');
