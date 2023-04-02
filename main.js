@@ -50,6 +50,9 @@ const joinParagraphs = (text) => text.replace(/<\/p><p>/g, '');
 const joinBlockquotes = (text) =>
   text.replace(/<\/blockquote><blockquote>/g, '<br>');
 
+// Join tags
+const joinTags = (text) => _.flow(joinParagraphs, joinBlockquotes)(text);
+
 // Parses markdown headers to html
 const parseHeader = (line) => {
   const level = line.split(' ')[0].length;
@@ -122,8 +125,7 @@ const convertMarkdownToHtml = _.flow(
   _.map(_.cond(conditions)),
   parseLists,
   _.join('\n'),
-  joinParagraphs,
-  joinBlockquotes,
+  joinTags,
   writeFile
 );
 

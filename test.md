@@ -53,6 +53,8 @@ This is a `code text` and this is a horizontal line:
 This is a **_blockquote_**:
 
 > Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris in arcu vel nisi tempor semper. Integer volutpat bibendum neque vitae consectetur.
+>
+> With multiple lines.
 
 <br>
 
