@@ -50,10 +50,39 @@ const parseHeader = (line) => {
   return `<h${level}>${content}</h${level}>`;
 };
 
-// Parses markdown lists to html
+// Parses markdown unordered lists to html
 const parseUnorderedList = (line) => {
   const content = line.slice(2).trim();
-  return `<li>${content}</li>`;
+  return `<ul>${content}</ul>`;
+};
+
+// Parses markdown ordered lists to html
+const parseOrderedList = (line) => {
+  const index = line.indexOf('.') + 1;
+  const content = line.slice(index).trim();
+  return `<ol>${content}</ol>`;
+};
+
+// Parses de <ul> and <ol> tags to <li> tags
+const parseListTags = (line, tag) => {
+  const regexStartingTag = new RegExp(`<${tag}>`, 'g');
+  const regexEndingTag = new RegExp(`</${tag}>`, 'g');
+  return `<${tag}>\n${line
+    .replace(regexStartingTag, '  <li>')
+    .replace(regexEndingTag, '</li>\n')
+    .trimEnd()}\n</${tag}>`;
+};
+
+// Parses de <ul> and <ol> tags to <li> tags
+const parseLists = (array) => {
+  const joinedArray = array.join('').split('\n');
+  return joinedArray.map((line) =>
+    line.startsWith('<ul>')
+      ? parseListTags(line, 'ul')
+      : line.startsWith('<ol>')
+      ? parseListTags(line, 'ol')
+      : line
+  );
 };
 
 // Parses markdown blockquotes to html
@@ -66,11 +95,10 @@ const parseBlockquote = (line) => {
 const conditions = [
   [(line) => line === '', () => '\n'],
   [(line) => /^#{1,6} /g.test(line), (line) => parseHeader(line)],
-  [
-    (line) => line.startsWith('* ') || line.startsWith('- '),
-    (line) => parseUnorderedList(line),
-  ],
+  [(line) => /^[*+-] /g.test(line), (line) => parseUnorderedList(line)],
+  [(line) => /^[0-9]+. /g.test(line), (line) => parseOrderedList(line)],
   [(line) => line.startsWith('>'), (line) => parseBlockquote(line)],
+  [(line) => line === '<br>', (line) => line],
   [_.stubTrue, (line) => `<p>${line}</p>`],
 ];
 
@@ -83,7 +111,8 @@ const convertMarkdownToHtml = _.flow(
   addLineBreaks,
   _.split('\n'),
   _.map(_.cond(conditions)),
-  _.join(''),
+  parseLists,
+  _.join('\n'),
   joinParagraphs,
   joinBlockquotes,
   writeFile
