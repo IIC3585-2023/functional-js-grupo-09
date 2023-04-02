@@ -66,5 +66,4 @@ This is an image:
 
 ###### Heading 6
 
-This is a link: [markdown guide](https://www.markdownguide.org/basic-syntax/) and this is the same link:
-<https://www.markdownguide.org/basic-syntax/>.
+This is a link: [markdown guide](https://www.markdownguide.org/basic-syntax/).
