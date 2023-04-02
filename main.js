@@ -17,6 +17,9 @@ const parseBoldUnderscores = parseTag(/\_\_(.*?)\_\_/gm, 'strong');
 const parseItalicAsteriscs = parseTag(/\*(.*?)\*/gm, 'em');
 const parseItalicUnderscores = parseTag(/\_(.*?)\_/gm, 'em');
 
+const parseCodeDoubleBackticks = parseTag(/``(.*?)``/gm, 'code');
+const parseCodeSingleBackticks = parseTag(/`(.*?)`/gm, 'code');
+
 // Parses markdown bold text to html
 const parseBolds = (text) =>
   _.flow(parseBoldAsteriscs, parseBoldUnderscores)(text);
@@ -24,6 +27,10 @@ const parseBolds = (text) =>
 // Parses markdown italic text to html
 const parseItalics = (text) =>
   _.flow(parseItalicAsteriscs, parseItalicUnderscores)(text);
+
+// Parses markdown code text to html
+const parseCode = (text) =>
+  _.flow(parseCodeDoubleBackticks, parseCodeSingleBackticks)(text);
 
 // Adds line breaks to text
 const addLineBreaks = (text) => text.replace(/  $/gm, '<br>');
@@ -98,6 +105,7 @@ const conditions = [
   [(line) => /^[*+-] /g.test(line), (line) => parseUnorderedList(line)],
   [(line) => /^[0-9]+. /g.test(line), (line) => parseOrderedList(line)],
   [(line) => line.startsWith('>'), (line) => parseBlockquote(line)],
+  [(line) => line === '---', (line) => '<hr />'],
   [(line) => line === '<br>', (line) => line],
   [_.stubTrue, (line) => `<p>${line}</p>`],
 ];
@@ -106,6 +114,7 @@ const convertMarkdownToHtml = _.flow(
   readFile,
   parseBolds,
   parseItalics,
+  parseCode,
   parseImages,
   parseLinks,
   addLineBreaks,

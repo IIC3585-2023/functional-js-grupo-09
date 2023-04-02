@@ -15,6 +15,8 @@ This is a _list_:
 - Item 2
 - Item 3
 
+<br>
+
 And this is a **_second_** **unordered list**:
 
 - First item
@@ -22,8 +24,6 @@ And this is a **_second_** **unordered list**:
 - Third item
 
 <br>
-
-### Heading 3
 
 This is an **ordered list**:
 
@@ -37,6 +37,14 @@ This is an **ordered list**:
 8. Eight items
 9. Nine items
 10. Ten items
+
+<br>
+
+### Heading 3
+
+This is a `code text` and this is a horizontal line:
+
+---
 
 <br>
 
@@ -58,4 +66,5 @@ This is an image:
 
 ###### Heading 6
 
-This is a link: [markdown guide](https://www.markdownguide.org/basic-syntax/)
+This is a link: [markdown guide](https://www.markdownguide.org/basic-syntax/) and this is the same link:
+<https://www.markdownguide.org/basic-syntax/>.
