@@ -11,11 +11,11 @@ const writeFile = _.curry(fs.writeFileSync)('output.html', _, 'utf8');
 const parseTag = (regex, tag) => (text) =>
   text.replace(regex, `<${tag}>$1</${tag}>`);
 
-const parseBoldAsteriscs = parseTag(/\*\*(.*?)\*\*/gm, 'b');
-const parseBoldUnderscores = parseTag(/\_\_(.*?)\_\_/gm, 'b');
+const parseBoldAsteriscs = parseTag(/\*\*(.*?)\*\*/gm, 'strong');
+const parseBoldUnderscores = parseTag(/\_\_(.*?)\_\_/gm, 'strong');
 
-const parseItalicAsteriscs = parseTag(/\*(.*?)\*/gm, 'i');
-const parseItalicUnderscores = parseTag(/\_(.*?)\_/gm, 'i');
+const parseItalicAsteriscs = parseTag(/\*(.*?)\*/gm, 'em');
+const parseItalicUnderscores = parseTag(/\_(.*?)\_/gm, 'em');
 
 // Parses markdown bold text to html
 const parseBolds = (text) =>
@@ -27,6 +27,14 @@ const parseItalics = (text) =>
 
 // Adds line breaks to text
 const addLineBreaks = (text) => text.replace(/  $/gm, '<br>');
+
+// Parse markdown images to html
+const parseImages = (text) =>
+  text.replace(/!\[(.*?)\]\((.*?)\)/gm, "<img alt='$1' src='$2' />");
+
+// Parse markdown links to html
+const parseLinks = (text) =>
+  text.replace(/\[(.*?)\]\((.*?)\)/gm, "<a href='$2'>$1</a>");
 
 // Join paragraphs tags
 const joinParagraphs = (text) => text.replace(/<\/p><p>/g, '');
@@ -70,6 +78,8 @@ const convertMarkdownToHtml = _.flow(
   readFile,
   parseBolds,
   parseItalics,
+  parseImages,
+  parseLinks,
   addLineBreaks,
   _.split('\n'),
   _.map(_.cond(conditions)),
@@ -78,19 +88,5 @@ const convertMarkdownToHtml = _.flow(
   joinBlockquotes,
   writeFile
 );
-
-// others
-// .replace(/\[(.*?)\]\((.*?)\)/gim, "<a href='$2'>$1</a>")
-// .replace(/\n$/gim, '<br />')
-
-function parseMarkdown(markdownText) {
-  const htmlText = markdownText
-    .replace(/^\> (.*$)/gim, '<blockquote>$1</blockquote>')
-    .replace(/!\[(.*?)\]\((.*?)\)/gim, "<img alt='$1' src='$2' />")
-    .replace(/\[(.*?)\]\((.*?)\)/gim, "<a href='$2'>$1</a>")
-    .replace(/\n$/gim, '<br />');
-
-  return htmlText.trim();
-}
 
 convertMarkdownToHtml('test.md');

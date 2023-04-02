@@ -1,29 +1,38 @@
-# El formato Markdown
+# Heading 1
 
-## Parte 1
+This is a paragraph of text. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris in arcu vel nisi tempor semper. Integer volutpat bibendum neque vitae consectetur. Suspendisse efficitur eleifend sapien, ac fringilla est varius sed.
 
-El formato de markdown es ampliamente utilizado porque permite describir un **contenido en forma estructurada** en forma **sencilla**.
+This is a paragraph.  
+With a 2 spaces line break.
 
-Por ejemplo se puede usar en _GitHub_ para documentar el _código_, escribir manuales, etc.
+## Heading 2
 
-## Parte 2
+This is a _list_:
 
-Markdown puede ser usado para muchas cosas. Por ejemplo la gente lo utiliza para:
+- Item 1
+- Item 2
+- Item 3
 
-- crear páginas web
-- publicar documentos
-- escribir notas
-- hacer presentaciones
-- redactar correos
-- generar documentación técnica
-- escribir libros
+### Heading 3
 
-First line with two spaces after.  
-And the _**next line**_.
+This is an **ordered list**:
 
-First line with the HTML tag after.<br>
-And the next line.
+1. First item
+2. Second item
+3. Third item
 
-> Dorothy followed her through many of the beautiful rooms in her castle.
->
-> The Witch bade her clean the pots and kettles and sweep the floor and keep the fire fed with wood.
+#### Heading 4
+
+This is a **_blockquote_**:
+
+> Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris in arcu vel nisi tempor semper. Integer volutpat bibendum neque vitae consectetur.
+
+##### Heading 5
+
+This is an image:
+
+![image](https://geekytheory.com/content/images/size/w2000/2014/03/markdown.png)
+
+###### Heading 6
+
+This is a link: [markdown guide](https://www.markdownguide.org/basic-syntax/)
