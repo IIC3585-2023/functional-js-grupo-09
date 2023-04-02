@@ -4,7 +4,7 @@ const _ = require('lodash/fp');
 // Curried function to read file
 const readFile = _.curry(fs.readFileSync)(_, 'utf8');
 
-// Curried funtion to read file
+// Curried funtion to write file
 const writeFile = _.curry(fs.writeFileSync)('output.html', _, 'utf8');
 
 // Function to parse a text to a tag using regex
