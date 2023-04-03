@@ -108,7 +108,7 @@ const conditions = [
   [(line) => /^[*+-] /g.test(line), (line) => parseUnorderedList(line)],
   [(line) => /^[0-9]+. /g.test(line), (line) => parseOrderedList(line)],
   [(line) => line.startsWith('>'), (line) => parseBlockquote(line)],
-  [(line) => line === '---', (line) => '<hr />'],
+  [(line) => line === '---', () => '<hr />'],
   [(line) => line === '<br>', (line) => line],
   [_.stubTrue, (line) => `<p>${line}</p>`],
 ];
